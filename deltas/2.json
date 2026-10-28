@@ -1,0 +1,23 @@
+{
+  "fromVersion": 1,
+  "version": 2,
+  "upsert": [
+    {
+      "id": "tbank-f402d647f69e",
+      "bank": "TBANK",
+      "bankCategoryName": "Аптеки",
+      "category": "PHARMACY",
+      "mccCodes": [
+        5122,
+        5292,
+        5295,
+        5912
+      ],
+      "exceptions": "Оплата в аптеках и магазинах медикаментов. Медицинские услуги относятся к другим MCC.",
+      "sourceUrl": "https://cdn.tbank.ru/static/documents/description-mcc-categories.pdf",
+      "verifiedAt": "2026-10-28",
+      "version": 2
+    }
+  ],
+  "deletedIds": []
+}
