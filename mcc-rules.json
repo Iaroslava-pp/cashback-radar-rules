@@ -1,5 +1,11 @@
 {
   "schema": 1,
-  "version": 1,
-  "changes": []
+  "version": 2,
+  "changes": [
+    {
+      "version": 2,
+      "url": "deltas/2.json",
+      "sha256": "213181c9913d0517fe2284cdeacca46cbc983915d453bfd589d660e2a48b410a"
+    }
+  ]
 }
