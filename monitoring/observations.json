@@ -1,0 +1,24 @@
+{
+  "alfa-mcc": {
+    "sha256": "063e824af0c80064d1ff3b62f05f80b0ee6efc5eb74c519efcd48057278908a2",
+    "textSha256": "5acaebb1d155345578ae8e08692378f379d0dd1b2a53c7f5cd4c52f3a1e11b2f",
+    "checkedAt": "2026-10-30T20:47:14.399798+00:00",
+    "history": [
+      {
+        "sha256": "063e824af0c80064d1ff3b62f05f80b0ee6efc5eb74c519efcd48057278908a2",
+        "observedAt": "2026-10-30T20:47:14.399798+00:00"
+      }
+    ]
+  },
+  "yandex-loyalty": {
+    "sha256": "3e38a8ed2e3a7dde3376380034534bc6e187d412853ea1b2071840b1cf2bd6e8",
+    "textSha256": "cec525e4d0a72f367510fb6e9dd0e8e47ab8aef3058db83f7b6bb86caff795fb",
+    "checkedAt": "2026-10-30T20:47:14.399798+00:00",
+    "history": [
+      {
+        "sha256": "3e38a8ed2e3a7dde3376380034534bc6e187d412853ea1b2071840b1cf2bd6e8",
+        "observedAt": "2026-10-30T20:47:14.399798+00:00"
+      }
+    ]
+  }
+}
