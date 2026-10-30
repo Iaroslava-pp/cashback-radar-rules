@@ -12,10 +12,11 @@ import subprocess
 import ssl
 from datetime import datetime, timedelta, timezone
 from html.parser import HTMLParser
+from http.cookiejar import CookieJar
 from pathlib import Path
 from urllib.error import URLError
 from urllib.parse import urlsplit
-from urllib.request import HTTPRedirectHandler, HTTPSHandler, Request, build_opener
+from urllib.request import HTTPRedirectHandler, HTTPSHandler, HTTPCookieProcessor, Request, build_opener
 
 MAX_BYTES = 20_000_000
 
@@ -97,9 +98,19 @@ def tls_context(source):
 def fetch(source):
     """Download public official material without cookies, credentials or personal data."""
     url = validated_url(source['url'], source['hosts'])
-    request = Request(url, headers={'User-Agent': 'CashbackRadar-document-monitor/1.0',
-                                    'Accept': 'application/pdf,text/html'})
-    with build_opener(OfficialRedirect(source['hosts']), HTTPSHandler(context=tls_context(source))).open(request, timeout=30) as response:
+    headers = {'User-Agent': 'Mozilla/5.0 CashbackRadar-document-monitor/1.0',
+               'Accept': 'application/pdf,text/html'}
+    # Some public bank document routes establish an anonymous session first.
+    # Cookies belong to this single source and are never logged or saved.
+    opener = build_opener(OfficialRedirect(source['hosts']), HTTPSHandler(context=tls_context(source)),
+                          HTTPCookieProcessor(CookieJar()))
+    if source.get('bootstrapUrl'):
+        bootstrap = validated_url(source['bootstrapUrl'], source['hosts'])
+        with opener.open(Request(bootstrap, headers=headers), timeout=30) as response:
+            if response.status != 200 or len(response.read(MAX_BYTES + 1)) > MAX_BYTES:
+                raise ValueError('Invalid public document landing page')
+    request = Request(url, headers=headers)
+    with opener.open(request, timeout=30) as response:
         if response.status != 200: raise ValueError('Unexpected document HTTP status')
         body = response.read(MAX_BYTES + 1)
         if len(body) > MAX_BYTES: raise ValueError('Document exceeds size limit')

@@ -19,7 +19,7 @@
         "sberbank.ru"
       ],
       "caFile": "certificates/russian_trusted_root_ca.crt",
-      "caSha256": "936a43fea6e8e525bcc0f81acd9c3d21b4fc4b9b68acea7906d698005afc6504"
+      "caSha256": "0819977502d9aed2234830f6ffb91f82f401d3674c6e51dd19e16d8b3dbf0eb4"
     },
     {
       "id": "alfa-mcc",
@@ -34,8 +34,11 @@
       "bank": "OZON",
       "url": "https://finance.ozon.ru/documents/loyalty",
       "hosts": [
-        "finance.ozon.ru"
-      ]
+        "finance.ozon.ru",
+        "sso.ozon.ru",
+        "cdn1.ozone.ru"
+      ],
+      "bootstrapUrl": "https://finance.ozon.ru/products"
     },
     {
       "id": "yandex-loyalty",

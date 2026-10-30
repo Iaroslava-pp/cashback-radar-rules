@@ -2,12 +2,13 @@
 import tempfile
 import ssl
 import hashlib
+import json
 import unittest
 from datetime import datetime, timezone
 from pathlib import Path
 from urllib.error import HTTPError
 from unittest.mock import patch
-from monitor_bank_documents import due, extract, observe, validated_url, tls_context
+from monitor_bank_documents import due, extract, observe, validated_url, tls_context, fetch, MAX_BYTES
 
 
 class DocumentMonitorTest(unittest.TestCase):
@@ -23,6 +24,21 @@ class DocumentMonitorTest(unittest.TestCase):
         for value in (None, 'invalid', '2026-11-01T00:00:00+00:00', '2026-10-30T00:00:00'):
             self.assertTrue(due(self.now, value))
 
+    def test_packaged_source_ca_matches_its_pin_after_repository_text_normalization(self):
+        root = Path(__file__).resolve().parents[1]
+        config = root / 'monitoring/sources.json'
+        if not config.exists(): config = root / 'rules-monitor/sources.json'
+        sources = json.loads(config.read_text())['sources']
+        count = 0
+        for source in sources:
+            if source.get('caFile'):
+                packaged = {**source, 'caFile': str(config.parent / source['caFile'])}
+                context = tls_context(packaged)
+                self.assertTrue(context.check_hostname)
+                self.assertEqual(ssl.CERT_REQUIRED, context.verify_mode)
+                count += 1
+        self.assertEqual(1, count)
+
     def test_additional_bank_ca_is_pinned_and_keeps_hostname_verification(self):
         standard = tls_context(self.source)
         self.assertTrue(standard.check_hostname)
@@ -35,6 +51,28 @@ class DocumentMonitorTest(unittest.TestCase):
             with patch('monitor_bank_documents.ssl.create_default_context') as create:
                 tls_context(source)
                 create.return_value.load_verify_locations.assert_called_once_with(cadata='official CA fixture')
+
+    def test_public_document_bootstrap_is_scoped_and_download_stays_bounded(self):
+        class Response:
+            status = 200
+            def __init__(self, body): self.body = body
+            def __enter__(self): return self
+            def __exit__(self, *_args): pass
+            def read(self, limit): return self.body[:limit]
+        requests = []
+        def opened(request, **kwargs):
+            requests.append(request.full_url)
+            self.assertEqual(30, kwargs['timeout'])
+            return Response(b'public page' if len(requests) == 1 else b'%PDF-document')
+        source = {**self.source, 'bootstrapUrl': 'https://cdn.tbank.ru/public'}
+        with patch('monitor_bank_documents.build_opener') as build:
+            build.return_value.open.side_effect = opened
+            self.assertEqual(b'%PDF-document', fetch(source))
+        self.assertEqual([source['bootstrapUrl'], source['url']], requests)
+        with patch('monitor_bank_documents.build_opener') as build:
+            build.return_value.open.return_value = Response(b'x' * (MAX_BYTES + 1))
+            with self.assertRaises(ValueError): fetch(self.source)
+        with self.assertRaises(ValueError): fetch({**source, 'bootstrapUrl': 'https://foreign.example/'})
 
     def test_urls_reject_foreign_host_credentials_and_cleartext(self):
         self.assertEqual(self.source['url'], validated_url(self.source['url'], self.source['hosts']))
