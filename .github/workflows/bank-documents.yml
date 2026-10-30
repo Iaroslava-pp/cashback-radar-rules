@@ -1,0 +1,50 @@
+name: Official bank document observations
+on:
+  schedule:
+    - cron: '23 */4 * * *'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['tools/monitor_bank_documents.py', 'tools/test_monitor_bank_documents.py', 'monitoring/sources.json', '.github/workflows/bank-documents.yml']
+permissions:
+  contents: read
+concurrency:
+  group: bank-document-observations
+  cancel-in-progress: false
+jobs:
+  observe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - name: Verify observer invariants
+        run: python3 -W error -m unittest discover -s tools -p 'test_monitor_bank_documents.py'
+      - name: Ensure PDF extraction is available
+        run: |
+          if ! command -v pdftotext > /dev/null; then
+            sudo apt-get update
+            sudo apt-get install -y poppler-utils
+          fi
+      - name: Observe public official sources
+        run: python3 tools/monitor_bank_documents.py --sources monitoring/sources.json --state monitoring/observations.json --output evidence
+      - name: Preserve successful observations, including partial source failures
+        if: always()
+        run: |
+          if test -f monitoring/observations.json; then
+            git config user.name 'github-actions[bot]'
+            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+            git add monitoring/observations.json
+            if ! git diff --cached --quiet; then
+              git commit -m 'Record official document observations without changing published rules'
+              git push origin HEAD:main
+            fi
+          fi
+      - uses: actions/upload-artifact@v7.0.2
+        if: always()
+        with:
+          name: official-bank-document-evidence
+          path: evidence/
+          retention-days: 90
+          if-no-files-found: ignore

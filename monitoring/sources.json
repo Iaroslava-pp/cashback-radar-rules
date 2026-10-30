@@ -1,0 +1,11 @@
+{
+  "schema": 1,
+  "sources": [
+    {"id": "tbank-mcc", "bank": "TBANK", "url": "https://cdn.tbank.ru/static/documents/description-mcc-categories.pdf", "hosts": ["cdn.tbank.ru"]},
+    {"id": "sber-loyalty", "bank": "SBER", "url": "https://www.sberbank.ru/common/img/spasibo/docs/loyalty_rules.pdf", "hosts": ["www.sberbank.ru", "sberbank.ru"]},
+    {"id": "alfa-mcc", "bank": "ALFA", "url": "https://alfabank.servicecdn.ru/marketing/ac/d9/marketing/MCCD_july.pdf", "hosts": ["alfabank.servicecdn.ru"]},
+    {"id": "ozon-documents", "bank": "OZON", "url": "https://finance.ozon.ru/documents/loyalty", "hosts": ["finance.ozon.ru"]},
+    {"id": "yandex-loyalty", "bank": "YANDEX", "url": "https://yandex.ru/legal/card_and_pay_points/ru/", "hosts": ["yandex.ru"]},
+    {"id": "vtb-loyalty", "bank": "VTB", "enabled": false, "reason": "Full VTB audit explicitly deferred by owner until the final stage", "url": "https://www.vtb.ru/media-files/vtb.ru/sitepages/personal/karty/programma-loyalnosti/usloviya_pl.pdf", "hosts": ["www.vtb.ru", "vtb.ru"]}
+  ]
+}
