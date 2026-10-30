@@ -17,7 +17,9 @@
       "hosts": [
         "www.sberbank.ru",
         "sberbank.ru"
-      ]
+      ],
+      "caFile": "certificates/russian_trusted_root_ca.crt",
+      "caSha256": "936a43fea6e8e525bcc0f81acd9c3d21b4fc4b9b68acea7906d698005afc6504"
     },
     {
       "id": "alfa-mcc",

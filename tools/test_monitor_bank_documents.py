@@ -1,11 +1,13 @@
 """Document observations must never activate unreviewed bank rules."""
 import tempfile
+import ssl
+import hashlib
 import unittest
 from datetime import datetime, timezone
 from pathlib import Path
 from urllib.error import HTTPError
 from unittest.mock import patch
-from monitor_bank_documents import due, extract, observe, validated_url
+from monitor_bank_documents import due, extract, observe, validated_url, tls_context
 
 
 class DocumentMonitorTest(unittest.TestCase):
@@ -20,6 +22,19 @@ class DocumentMonitorTest(unittest.TestCase):
         self.assertFalse(due(self.now, '2026-10-30T20:00:00+00:00'))
         for value in (None, 'invalid', '2026-11-01T00:00:00+00:00', '2026-10-30T00:00:00'):
             self.assertTrue(due(self.now, value))
+
+    def test_additional_bank_ca_is_pinned_and_keeps_hostname_verification(self):
+        standard = tls_context(self.source)
+        self.assertTrue(standard.check_hostname)
+        self.assertEqual(ssl.CERT_REQUIRED, standard.verify_mode)
+        with tempfile.TemporaryDirectory() as temporary:
+            certificate = Path(temporary) / 'bank.crt'; certificate.write_text('official CA fixture')
+            source = {**self.source, 'caFile': str(certificate), 'caSha256': 'wrong'}
+            with self.assertRaises(ValueError): tls_context(source)
+            source['caSha256'] = hashlib.sha256(certificate.read_bytes()).hexdigest()
+            with patch('monitor_bank_documents.ssl.create_default_context') as create:
+                tls_context(source)
+                create.return_value.load_verify_locations.assert_called_once_with(cadata='official CA fixture')
 
     def test_urls_reject_foreign_host_credentials_and_cleartext(self):
         self.assertEqual(self.source['url'], validated_url(self.source['url'], self.source['hosts']))

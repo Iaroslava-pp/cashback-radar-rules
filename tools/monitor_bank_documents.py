@@ -9,12 +9,13 @@ import hashlib
 import json
 import re
 import subprocess
+import ssl
 from datetime import datetime, timedelta, timezone
 from html.parser import HTMLParser
 from pathlib import Path
 from urllib.error import URLError
 from urllib.parse import urlsplit
-from urllib.request import HTTPRedirectHandler, Request, build_opener
+from urllib.request import HTTPRedirectHandler, HTTPSHandler, Request, build_opener
 
 MAX_BYTES = 20_000_000
 
@@ -78,12 +79,27 @@ def due(now, previous):
     return now - last >= timedelta(hours=hours)
 
 
+def tls_context(source):
+    """Use standard TLS validation, optionally adding one pinned official CA for this source only.
+
+    No system trust store is changed. The additional CA is never used by the
+    phone, map requests, other bank sources, or any personal-data connection.
+    """
+    context = ssl.create_default_context()
+    if source.get('caFile'):
+        certificate = Path(source['caFile']).read_bytes()
+        if hashlib.sha256(certificate).hexdigest() != source.get('caSha256'):
+            raise ValueError('Official CA checksum mismatch')
+        context.load_verify_locations(cadata=certificate.decode('ascii'))
+    return context
+
+
 def fetch(source):
     """Download public official material without cookies, credentials or personal data."""
     url = validated_url(source['url'], source['hosts'])
     request = Request(url, headers={'User-Agent': 'CashbackRadar-document-monitor/1.0',
                                     'Accept': 'application/pdf,text/html'})
-    with build_opener(OfficialRedirect(source['hosts'])).open(request, timeout=30) as response:
+    with build_opener(OfficialRedirect(source['hosts']), HTTPSHandler(context=tls_context(source))).open(request, timeout=30) as response:
         if response.status != 200: raise ValueError('Unexpected document HTTP status')
         body = response.read(MAX_BYTES + 1)
         if len(body) > MAX_BYTES: raise ValueError('Document exceeds size limit')
@@ -145,6 +161,12 @@ def main():
     parser.add_argument('--force', action='store_true')
     args = parser.parse_args()
     sources = json.loads(args.sources.read_text())['sources']
+    for source in sources:
+        if source.get('caFile'):
+            base = args.sources.parent.resolve()
+            certificate = (base / source['caFile']).resolve()
+            if not certificate.is_relative_to(base): raise ValueError('CA file must belong to the source configuration')
+            source['caFile'] = str(certificate)
     previous = json.loads(args.state.read_text()) if args.state.exists() else {}
     state, reports = observe(sources, previous, args.output, datetime.now(timezone.utc), force=args.force)
     args.state.parent.mkdir(parents=True, exist_ok=True)
