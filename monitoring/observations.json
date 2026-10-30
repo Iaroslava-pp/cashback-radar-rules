@@ -20,5 +20,16 @@
         "observedAt": "2026-10-30T20:47:14.399798+00:00"
       }
     ]
+  },
+  "tbank-mcc": {
+    "sha256": "a99fe21988ec1a2a02b6d414874a2ee0152df13eba128991f5d9e78bf3cc8c5a",
+    "textSha256": "4db02744c4bdb6116edf07c245833f19e2231588c34bef52cbad65ee982243b6",
+    "checkedAt": "2026-10-30T20:52:05.844359+00:00",
+    "history": [
+      {
+        "sha256": "a99fe21988ec1a2a02b6d414874a2ee0152df13eba128991f5d9e78bf3cc8c5a",
+        "observedAt": "2026-10-30T20:52:05.844359+00:00"
+      }
+    ]
   }
 }
