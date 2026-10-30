@@ -76,6 +76,13 @@ class DocumentMonitorTest(unittest.TestCase):
             self.assertNotIn('private response', str(reports))
             self.assertEqual('review_required', reports[1]['status'])
 
+    def test_http_200_challenge_is_an_error_and_does_not_become_a_success(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            state, reports = observe([self.source], {}, Path(temporary), self.now,
+                                     downloader=lambda _: b'html', extractor=lambda *_: 'CAPTCHA verification ' * 10)
+            self.assertEqual({}, state)
+            self.assertEqual('error', reports[0]['status'])
+
     def test_deferred_and_not_due_sources_never_download(self):
         with tempfile.TemporaryDirectory() as temporary:
             _, reports = observe([{**self.source, 'enabled': False}, {**self.source, 'id': 'recent'}],

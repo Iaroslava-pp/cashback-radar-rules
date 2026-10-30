@@ -12,6 +12,7 @@ import subprocess
 from datetime import datetime, timedelta, timezone
 from html.parser import HTMLParser
 from pathlib import Path
+from urllib.error import URLError
 from urllib.parse import urlsplit
 from urllib.request import HTTPRedirectHandler, Request, build_opener
 
@@ -112,6 +113,9 @@ def observe(sources, previous, output, now, downloader=fetch, extractor=extract,
             body = downloader(source)
             digest = hashlib.sha256(body).hexdigest()
             text = extractor(body, output / (identity + '-' + digest[:12] + '.txt'))
+            lower = text.lower().replace('ё', 'е')
+            denied = ('access denied', 'captcha', 'доступ ограничен', 'проверка браузера', 'подтвердите, что вы не робот')
+            if any(marker in lower for marker in denied): raise ValueError('Access challenge is not an official document')
             text_hash = hashlib.sha256(text.encode()).hexdigest()
             changed = digest != old.get('sha256')
             report.update(status='review_required' if changed else 'unchanged', sha256=digest,
@@ -125,6 +129,7 @@ def observe(sources, previous, output, now, downloader=fetch, extractor=extract,
                                'checkedAt': now.isoformat(), 'history': history}
         except Exception as error:
             report.update(status='error', errorType=type(error).__name__)
+            if isinstance(error, URLError): report['reasonType'] = type(error.reason).__name__
             if hasattr(error, 'code'):
                 report['http'] = error.code
                 if hasattr(error, 'close'): error.close()
