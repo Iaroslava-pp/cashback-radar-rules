@@ -2,7 +2,7 @@
   "alfa-mcc": {
     "sha256": "063e824af0c80064d1ff3b62f05f80b0ee6efc5eb74c519efcd48057278908a2",
     "textSha256": "5acaebb1d155345578ae8e08692378f379d0dd1b2a53c7f5cd4c52f3a1e11b2f",
-    "checkedAt": "2026-10-30T20:47:14.399798+00:00",
+    "checkedAt": "2026-10-31T01:25:15.087524+00:00",
     "history": [
       {
         "sha256": "063e824af0c80064d1ff3b62f05f80b0ee6efc5eb74c519efcd48057278908a2",
@@ -11,20 +11,24 @@
     ]
   },
   "yandex-loyalty": {
-    "sha256": "3e38a8ed2e3a7dde3376380034534bc6e187d412853ea1b2071840b1cf2bd6e8",
+    "sha256": "df2ffa6dd88842e4b391938973188c77ed908b02db9bd7d726a6f47c5d5def8a",
     "textSha256": "cec525e4d0a72f367510fb6e9dd0e8e47ab8aef3058db83f7b6bb86caff795fb",
-    "checkedAt": "2026-10-30T20:47:14.399798+00:00",
+    "checkedAt": "2026-10-31T01:25:15.087524+00:00",
     "history": [
       {
         "sha256": "3e38a8ed2e3a7dde3376380034534bc6e187d412853ea1b2071840b1cf2bd6e8",
         "observedAt": "2026-10-30T20:47:14.399798+00:00"
+      },
+      {
+        "sha256": "df2ffa6dd88842e4b391938973188c77ed908b02db9bd7d726a6f47c5d5def8a",
+        "observedAt": "2026-10-31T01:25:15.087524+00:00"
       }
     ]
   },
   "tbank-mcc": {
     "sha256": "a99fe21988ec1a2a02b6d414874a2ee0152df13eba128991f5d9e78bf3cc8c5a",
     "textSha256": "4db02744c4bdb6116edf07c245833f19e2231588c34bef52cbad65ee982243b6",
-    "checkedAt": "2026-10-30T20:52:05.844359+00:00",
+    "checkedAt": "2026-10-31T01:25:15.087524+00:00",
     "history": [
       {
         "sha256": "a99fe21988ec1a2a02b6d414874a2ee0152df13eba128991f5d9e78bf3cc8c5a",
@@ -35,7 +39,7 @@
   "sber-loyalty": {
     "sha256": "117275ef075e5cb45823271276d631e83d2df87773b91647fda5fbdfe7d1a968",
     "textSha256": "6346e50bec1699f2cbbe6b22479186488c48b3f3c3115c9d6eba75b914809f27",
-    "checkedAt": "2026-10-30T21:01:22.680929+00:00",
+    "checkedAt": "2026-10-31T01:25:15.087524+00:00",
     "history": [
       {
         "sha256": "117275ef075e5cb45823271276d631e83d2df87773b91647fda5fbdfe7d1a968",
