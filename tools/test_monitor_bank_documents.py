@@ -62,6 +62,7 @@ class DocumentMonitorTest(unittest.TestCase):
         requests = []
         def opened(request, **kwargs):
             requests.append(request.full_url)
+            self.assertIsNone(request.get_header('Accept'))
             self.assertEqual(30, kwargs['timeout'])
             return Response(b'public page' if len(requests) == 1 else b'%PDF-document')
         source = {**self.source, 'bootstrapUrl': 'https://cdn.tbank.ru/public'}
@@ -73,6 +74,12 @@ class DocumentMonitorTest(unittest.TestCase):
             build.return_value.open.return_value = Response(b'x' * (MAX_BYTES + 1))
             with self.assertRaises(ValueError): fetch(self.source)
         with self.assertRaises(ValueError): fetch({**source, 'bootstrapUrl': 'https://foreign.example/'})
+        for item, expected in ((source, 'public_landing'), (self.source, 'document')):
+            with patch('monitor_bank_documents.build_opener') as build:
+                build.return_value.open.side_effect = HTTPError(item['url'], 403, 'private response', {}, None)
+                with self.assertRaises(HTTPError) as caught: fetch(item)
+                self.assertEqual(expected, caught.exception.document_stage)
+                caught.exception.close()
 
     def test_urls_reject_foreign_host_credentials_and_cleartext(self):
         self.assertEqual(self.source['url'], validated_url(self.source['url'], self.source['hosts']))
